@@ -1,0 +1,32 @@
+[env]
+exp_dir = 'experiments'
+exp_name = 'FER_split50_9x9'
+num_workers = 8
+
+[model]
+resolution = 9
+
+[data]
+type = 'L3F-dataset'
+root = './L3F-dataset'
+split = '50'
+patch_size = 128
+cropped_resolution = 9
+size_divisibility = 2
+
+[optim]
+num_iters = 50000
+batch_size = 2
+base_lr = 1e-4
+save_step = 10000
+eval_step = 10000
+
+[[metrics]]
+name = 'PSNR'
+primary = true
+
+[[metrics]]
+name = 'SSIM'
+
+# [[metrics]]
+# name = 'LPIPS'
