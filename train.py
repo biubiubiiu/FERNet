@@ -7,11 +7,10 @@ from pprint import pformat
 
 import torch
 import torch.nn.functional as F
-from PIL import Image
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
-from torchvision.utils import make_grid
+from torchvision.utils import save_image
 from tqdm import tqdm
 
 import losses
@@ -112,19 +111,19 @@ def main():
                     h, w = gt.shape[-2:]
                     out = out[..., :h, :w]
 
-                    grid_out = make_grid(out.flatten(0, 2), nrow=9, padding=0, normalize=False)
-                    grid_gt = make_grid(gt.flatten(0, 2), nrow=9, padding=0, normalize=False)
+                    # reshape to [U*V, C, H, W]
+                    out = out.flatten(0, 2)
+                    gt = gt.flatten(0, 2)
 
-                    quant_out = grid_out.mul(255).add_(0.5).clamp_(0, 255).to('cpu', torch.uint8)
-                    quant_gt = grid_gt.mul(255).add_(0.5).clamp_(0, 255).to('cpu', torch.uint8)
+                    quant_out = out.mul(255).add_(0.5).clamp_(0, 255).to('cpu', torch.uint8)
+                    quant_gt = gt.mul(255).add_(0.5).clamp_(0, 255).to('cpu', torch.uint8)
 
                     for (_, metric) in val_metrics:
-                        metric.update(quant_out.unsqueeze(0).float(), quant_gt.unsqueeze(0).float())
+                        metric.update(quant_out.float(), quant_gt.float())
 
                     if args.save_images:
-                        saved_img = quant_out.permute(1, 2, 0).numpy()
                         save_path = os.path.join(env.visual_dir(iter=iteration), f'{stem}.png')
-                        Image.fromarray(saved_img).save(save_path)
+                        save_image(out, save_path, nrow=config.model.resolution, padding=0, normalize=False)
 
                 metric_vals = []
                 for i, (name, metric) in enumerate(val_metrics):
