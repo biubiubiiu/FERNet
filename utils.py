@@ -9,6 +9,7 @@ import numpy as np
 import toml
 import torch
 from addict import Dict
+from termcolor import colored
 from torch.backends import cudnn
 from torchmetrics import MeanMetric, Metric
 from torchmetrics.image import (LearnedPerceptualImagePatchSimilarity,
@@ -74,11 +75,13 @@ class Env(object):
             console_hdl.setLevel(logging.INFO)
         hdls.append(console_hdl)
 
+        color_fmt = colored('[%(asctime)s %(name)s]', 'green') + \
+            colored('(%(filename)s %(lineno)d)', 'yellow') + ': %(levelname)s %(message)s'
         logging.basicConfig(
             handlers=hdls,
             level=logging.DEBUG,
-            format='%(asctime)s | %(message)s',
-            datefmt='%m-%d %H:%M:%S',
+            format=color_fmt,
+            datefmt='%Y-%m-%d %H:%M:%S',
             force=True
         )
 
