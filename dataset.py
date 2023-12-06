@@ -1,4 +1,5 @@
 import itertools
+import logging
 import math
 import pathlib
 
@@ -51,7 +52,7 @@ class L3FDataset(Dataset):
         if memorize:
             for i in tqdm(range(len(self.gt_fpaths)), desc='loading dataset into memory', leave=False):
                 _ = self[i]
-            print('dataset has been loaded')
+            logging.info('dataset has been loaded')
 
     def __len__(self):
         return len(self.gt_fpaths)

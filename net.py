@@ -101,12 +101,10 @@ class FERNet(nn.Module):
         self.resolution = resolution
 
         # stage 1
-        self.embedding = nn.Sequential(
-            Conv(resolution ** 2, 64),
-            nn.ReLU(inplace=True),
-            Conv(64, 3),
-            nn.ReLU(inplace=True)
-        )
+        self.embedding = nn.Sequential(Conv(resolution ** 2, 64),
+                                       nn.ReLU(inplace=True),
+                                       Conv(64, 3),
+                                       nn.ReLU(inplace=True))
         # stage 2
         self.kpn = KPN(in_channels=2, mid_channels=9, out_kernel_size=(3, 6, 3, 3))
         # stage 3

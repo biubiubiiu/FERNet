@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 from pprint import pformat
 
@@ -27,14 +28,14 @@ def main():
     args = parse_arguments()
     config = utils.parse_config(args.config)
     env = utils.init_env(args, config, training=False)
-    print(f'using config file:\n{pformat(config)}')
-    print(f'using device {env.device}')
+    logging.info(f'using config file:\n{pformat(config)}')
+    logging.info(f'using device {env.device}')
 
     model = FERNet(resolution=config.model.resolution).to(env.device)
     ckpt = torch.load(args.ckpt, map_location=env.device)
     model.load_state_dict(ckpt['model_state_dict'])
     model.eval()
-    print(f'loading model from {args.ckpt}')
+    logging.info(f'loading model from {args.ckpt}')
 
     test_dataset = L3FDataset(config.data, mode='test')
     test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False, num_workers=config.env.num_workers)
@@ -68,7 +69,7 @@ def main():
                 save_image(out, save_path, nrow=config.model.resolution, padding=0, normalize=False)
 
     summary = '; '.join([f'{name} {metric.compute():.4f}' for (name, metric) in test_metrics])
-    print(f'test result: {summary}')
+    logging.info(f'test result: {summary}')
 
 
 if __name__ == '__main__':

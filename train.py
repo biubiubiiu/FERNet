@@ -63,10 +63,9 @@ def main():
         start_iter = int(ckpt['start_iter'])
 
     acc_loss_dict = defaultdict(lambda: 0)
-    vgg_perceptual_loss = losses.VGGPerceptualLoss(
-        feature_layers=[8, 16],
-        weights=[1, 1],
-        resize=False, normalized=False).to(env.device)
+    vgg_perceptual_loss = losses.VGGPerceptualLoss(feature_layers=[8, 16],
+                                                   weights=[1, 1],
+                                                   resize=False, normalized=False).to(env.device)
     for iteration in tqdm(range(start_iter, config.optim.num_iters+1), dynamic_ncols=True, desc='Training'):
         model.train()
         data = next(train_loader)
@@ -74,10 +73,8 @@ def main():
         out = model(lq)
 
         l1_loss = F.l1_loss(out, gt)
-        freq_loss = 0.2 * F.l1_loss(
-            torch.abs(torch.fft.rfft2(out.flatten(0, 2), norm='ortho')),
-            torch.abs(torch.fft.rfft2(gt.flatten(0, 2), norm='ortho')),
-        )
+        freq_loss = 0.2 * F.l1_loss(torch.abs(torch.fft.rfft2(out.flatten(0, 2), norm='ortho')),
+                                    torch.abs(torch.fft.rfft2(gt.flatten(0, 2), norm='ortho')))
         perceptual_loss = 0.2 * vgg_perceptual_loss(out.flatten(0, 2), gt.flatten(0, 2))
         loss = l1_loss + freq_loss + perceptual_loss
 
@@ -90,8 +87,8 @@ def main():
         acc_loss_dict['perceptual_loss'] += perceptual_loss.item()
 
         if iteration % len(train_dataset) == 0:
-            logging.debug(
-                f'[Iter {iteration}] ' + ', '.join([f'{name}: {val:.3f}' for name, val in acc_loss_dict.items()]))
+            logging.debug(f'[Iter {iteration}] ' +
+                          ', '.join([f'{name}: {val:.3f}' for name, val in acc_loss_dict.items()]))
             for name, val in acc_loss_dict.items():
                 writer.add_scalar(name, val, iteration)
             acc_loss_dict.clear()
