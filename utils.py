@@ -65,23 +65,25 @@ class Env(object):
         return device
 
     def setup_logger(self, exp_dir, save_local, console_high_pri_msg_only):
+        fmt = '[%(asctime)s %(name)s] (%(filename)s %(lineno)d): %(levelname)s %(message)s'
+        color_fmt = colored('[%(asctime)s %(name)s]', 'green') + \
+            colored('(%(filename)s %(lineno)d)', 'yellow') + ': %(levelname)s %(message)s'
+        datefmt = '%Y-%m-%d %H:%M:%S'
+
         handlers = []
         if save_local:
             log_fpath = os.path.join(exp_dir, f'{strftime("%m%d_%H%M%S", localtime())}.log')
-            handlers.append(logging.FileHandler(log_fpath))
+            file_handler = logging.FileHandler(log_fpath)
+            file_handler.setFormatter(logging.Formatter(fmt=fmt, datefmt=datefmt))
+            handlers.append(file_handler)
 
-        console_hdl = logging.StreamHandler(sys.stdout)
+        console_handler = logging.StreamHandler(sys.stdout)
+        console_handler.setFormatter(logging.Formatter(fmt=color_fmt, datefmt=datefmt))
         if console_high_pri_msg_only:
-            console_hdl.setLevel(logging.INFO)
-        handlers.append(console_hdl)
+            console_handler.setLevel(logging.INFO)
+        handlers.append(console_handler)
 
-        color_fmt = colored('[%(asctime)s %(name)s]', 'green') + \
-            colored('(%(filename)s %(lineno)d)', 'yellow') + ': %(levelname)s %(message)s'
-        logging.basicConfig(handlers=handlers,
-                            level=logging.DEBUG,
-                            format=color_fmt,
-                            datefmt='%Y-%m-%d %H:%M:%S',
-                            force=True)
+        logging.basicConfig(handlers=handlers, level=logging.DEBUG, force=True)
 
     def seed_everything(self, seed):
         """ Set random seed """
